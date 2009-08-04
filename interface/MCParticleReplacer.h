@@ -38,7 +38,8 @@ public:
 	~MCParticleReplacer();
 
 	virtual void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
-	virtual void beginJob(const edm::EventSetup& );
+	virtual void beginRun(edm::Run& iRun,const edm::EventSetup& iSetup);
+	virtual void beginJob();
 	virtual void endJob();
 	
 private:

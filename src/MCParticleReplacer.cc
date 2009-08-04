@@ -39,18 +39,34 @@ MCParticleReplacer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 	}
 }
 
-// ------------ method called once each job just before starting event loop  ------------
-void 
-MCParticleReplacer::beginJob(const edm::EventSetup& iSetup)
+void MCParticleReplacer::beginRun(edm::Run& iRun,const edm::EventSetup& iSetup)
 {
 	using namespace edm;
 	switch (desiredReplacerClass)
 	{
 		case 1:
-			replacer1->beginJob(iSetup);
+			replacer1->beginRun(iRun, iSetup);
 			break;
 		case 2:
-			//replacer2->beginJob(iSetup);
+			//replacer2->beginRun(iRun, iSetup);
+			//break;
+		default:
+			throw cms::Exception("MCParticleReplacer") << "desired replacer class not present" << std::endl;
+	}
+}
+
+// ------------ method called once each job just before starting event loop  ------------
+void 
+MCParticleReplacer::beginJob()
+{
+	using namespace edm;
+	switch (desiredReplacerClass)
+	{
+		case 1:
+			replacer1->beginJob();
+			break;
+		case 2:
+			//replacer2->beginJob();
 			//break;
 		default:
 			throw cms::Exception("MCParticleReplacer") << "desired replacer class not present" << std::endl;
