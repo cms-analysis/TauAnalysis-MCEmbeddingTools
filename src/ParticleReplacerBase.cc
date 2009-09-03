@@ -11,7 +11,7 @@ void ParticleReplacerBase::beginRun(edm::Run& iRun, const edm::EventSetup& iSetu
 void ParticleReplacerBase::endRun() {}
 void ParticleReplacerBase::endJob() {}
 
-boost::shared_ptr<ParticleReplacerBase> factory(int algo, const edm::ParameterSet& iConfig) {
+boost::shared_ptr<ParticleReplacerBase> ParticleReplacerBase::factory(int algo, const edm::ParameterSet& iConfig) {
   throw cms::Exception("Configuration") << "Unknown particle replacer algorithm " << algo
                                         << ". No supported algorithms yet." << std::endl;
   

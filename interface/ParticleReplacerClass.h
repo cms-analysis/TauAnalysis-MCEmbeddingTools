@@ -17,8 +17,7 @@
 
 
 // system include files
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
+#include "TauAnalysis/MCEmbeddingTools/interface/ParticleReplacerBase.h"
 
 #include <stack>
 #include <queue>
@@ -40,8 +39,6 @@
 #include "GeneratorInterface/ExternalDecays/interface/TauolaInterface.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
@@ -53,18 +50,14 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "TTree.h"
 
-using namespace std;
-using namespace edm;
-
-class ParticleReplacerClass : public edm::EDProducer
+class ParticleReplacerClass : public ParticleReplacerBase
 {
 public:
 	explicit ParticleReplacerClass(const edm::ParameterSet&);
 	~ParticleReplacerClass();
 
-	virtual void produce(edm::Event& iEvent, const edm::EventSetup& iSetup);
+        virtual std::auto_ptr<HepMC::GenEvent> produce(const reco::MuonCollection& muons, const reco::Vertex *pvtx=0, const HepMC::GenEvent *genEvt=0);
 	virtual void beginRun(edm::Run& iRun,const edm::EventSetup& iSetup);
-	virtual void beginJob();
 	virtual void endJob();
 
 private:
@@ -91,9 +84,6 @@ private:
 	// 1 - mumu->tautau (default value)
 	unsigned int transformationMode_;
 	
-	string HepMCSource_;
-	string selectedParticles_;
-
 	int motherParticleID_;
 	bool useExternalGenerators_ ;
 	bool useTauola_ ;

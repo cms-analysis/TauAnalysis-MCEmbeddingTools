@@ -14,15 +14,14 @@ extern "C" {
 }
 #endif
 
-ParticleReplacerClass::ParticleReplacerClass(const edm::ParameterSet& pset) : tauola_(pset)
+ParticleReplacerClass::ParticleReplacerClass(const edm::ParameterSet& pset):
+  ParticleReplacerBase(pset),
+  tauola_(pset)
 {
 // 	using namespace reco;
 	using namespace edm;
 	using namespace std;
 
-	// this module creates a edm::HepMCProduct
-	produces<edm::HepMCProduct>();
-	
 	//HepMC::HEPEVT_Wrapper::set_max_number_entries(4000);
 	//HepMC::HEPEVT_Wrapper::set_sizeof_real(8);
 
@@ -70,10 +69,6 @@ ParticleReplacerClass::ParticleReplacerClass(const edm::ParameterSet& pset) : ta
 
 	motherParticleID_ = pset.getUntrackedParameter<int>("motherParticleID",23);
 
-	selectedParticles_ = pset.getUntrackedParameter<string>("selectedParticles","selectMuons");
-
-	HepMCSource_ = pset.getUntrackedParameter<string>("HepMCSource","source");
-
 	// requires the visible decay products of a tau to have a sum transverse momentum
 	minVisibleTransverseMomentum_ = pset.getUntrackedParameter<double>("minVisibleTransverseMomentum",10.);
 
@@ -94,12 +89,14 @@ ParticleReplacerClass::~ParticleReplacerClass()
 }
 
 // ------------ method called to produce the data  ------------
-void
-ParticleReplacerClass::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
+std::auto_ptr<HepMC::GenEvent> ParticleReplacerClass::produce(const reco::MuonCollection& muons, const reco::Vertex *pvtx, const HepMC::GenEvent *genEvt)
 {
 	using namespace edm;
 	using namespace std;
 	using namespace HepMC;
+
+        if(pvtx != 0)
+          throw cms::Exception("Configuration") << "ParticleReplacerClass does NOT support using primary vertex as the origin for taus" << std::endl;
 
 	HepMC::GenEvent * evt=0;
 
@@ -107,15 +104,6 @@ ParticleReplacerClass::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 
 	reco::GenParticle * part1=0;
 	reco::GenParticle * part2=0;
-
-	/// 1) access the muons to be used
-	Handle<std::vector<reco::Muon> > dataHandle;
-	if (!iEvent.getByLabel(selectedParticles_,dataHandle))
-	{
-		edm::LogError("Replacer") << "Stored muons not found:\n"<< selectedParticles_;
-		return;
-	}
-	const std::vector<reco::Muon> muons = *( dataHandle.product() );
 
 	/// 2) transform the muons to the desired particles
 	std::vector<reco::Particle> particles;	
@@ -126,7 +114,7 @@ ParticleReplacerClass::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 			if (muons.size()!=2)
 			{
 				LogError("Replacer") << "the decay mode Z->mumu requires exactly two muons, aborting processing";
-				return;
+				return std::auto_ptr<HepMC::GenEvent>(0);
 			}
 	
 			targetParticleMass_  = 0.105658369;
@@ -145,7 +133,7 @@ ParticleReplacerClass::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 			if (muons.size()!=2)
 			{
 				LogError("Replacer") << "the decay mode Z->tautau requires exactly two muons, aborting processing";
-				return;
+				return std::auto_ptr<HepMC::GenEvent>(0);
 			}
 
 			targetParticleMass_  = 1.77690;
@@ -165,7 +153,7 @@ ParticleReplacerClass::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
       if (muons.size()!=2)
       {
         LogError("Replacer") << "the decay mode Z->tautau requires exactly two muons, aborting processing";
-        return;
+        return std::auto_ptr<HepMC::GenEvent>(0);
       }
 
       targetParticleMass_  = 1.77690;
@@ -185,7 +173,7 @@ ParticleReplacerClass::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 	if (particles.size()==0)
 	{
 		LogError("Replacer") << "the creation of the new particles failed somehow";
-		return;
+		return std::auto_ptr<HepMC::GenEvent>(0);
 	}
 	else
 	{
@@ -195,10 +183,8 @@ ParticleReplacerClass::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 	/// 3) prepare the event
 	if (replacementMode_==0)
 	{
-			Handle<edm::HepMCProduct> HepMCHandle;
-			iEvent.getByLabel(HepMCSource_,HepMCHandle);
-		
-			evt = new HepMC::GenEvent(*(HepMCHandle->GetEvent()));
+	
+			evt = new HepMC::GenEvent(*genEvt);
 	
 			for ( GenEvent::vertex_iterator p = evt->vertices_begin(); p != evt->vertices_end(); p++ ) 
 			{
@@ -286,7 +272,7 @@ ParticleReplacerClass::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		if (retevt==0)
 		{
 			LogError("Replacer") << "The new event could not be created due to some problems!";
-			return;
+			return std::auto_ptr<HepMC::GenEvent>(0);
 		}
 	
 		if (testEvent(retevt))
@@ -297,7 +283,7 @@ ParticleReplacerClass::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		LogError("Replacer") << "failed to create an event where the visible momenta exceed "<< minVisibleTransverseMomentum_ << " GeV ";
 		attempts=-1;
 		outTree->Fill();
-		return;
+		return std::auto_ptr<HepMC::GenEvent>(0);
 	}
 	attempts=nr_of_trials;
 	outTree->Fill();	
@@ -314,18 +300,16 @@ ParticleReplacerClass::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
 		}
 	}
 
-	auto_ptr<HepMCProduct> bare_product(new HepMCProduct()); 
+        std::auto_ptr<HepMC::GenEvent> ret(retevt);
+
 	if (printEvent_)
 		retevt->print(std::cout);
-
-	bare_product->addHepMCData(retevt);
-	iEvent.put(bare_product);
 
 	delete part1;
 	delete part2;
 	delete zvtx;
 	delete evt;
-	return;
+	return ret;
 }
 
 // ------------ method called once each job just before starting event loop  ------------
@@ -333,10 +317,6 @@ void ParticleReplacerClass::beginRun(edm::Run& iRun,const edm::EventSetup& iSetu
 {
 	tauola_.init(iSetup);
 }
-
-// ------------ method called once each run  ------------
-void ParticleReplacerClass::beginJob() { }
-
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
@@ -348,6 +328,7 @@ ParticleReplacerClass::endJob()
 bool ParticleReplacerClass::testEvent(HepMC::GenEvent * evt)
 {
 	using namespace HepMC;
+        using namespace edm;
 	
 	if (minVisibleTransverseMomentum_<=0)
 		return true;
