@@ -48,11 +48,6 @@ ParticleReplacerClass::ParticleReplacerClass(const edm::ParameterSet& pset):
     }         
 	}
 	
-	// replacementMode =
-	//	0 - remove Myons from existing HepMCProduct and implant taus (+decay products)
-	//	1 - build new HepMCProduct only with taus (+decay products)
-	replacementMode_ = pset.getUntrackedParameter<int>("replacementMode",1);
-
 	// generatorMode =
 	//	0 - use Pythia
 	//	1 - use Tauola
@@ -181,7 +176,7 @@ std::auto_ptr<HepMC::GenEvent> ParticleReplacerClass::produce(const reco::MuonCo
 	}
 
 	/// 3) prepare the event
-	if (replacementMode_==0)
+	if (genEvt)
 	{
 	
 			evt = new HepMC::GenEvent(*genEvt);
@@ -227,9 +222,8 @@ std::auto_ptr<HepMC::GenEvent> ParticleReplacerClass::produce(const reco::MuonCo
 				zvtx->add_particle_out(new HepMC::GenParticle((FourVector)it->p4(), it->pdgId(), 1, Flow(), Polarization(0,0)));
 			}
 	}
-
 	// new product with tau decays
-	if (replacementMode_==1)
+	else
 	{
 		reco::Particle::LorentzVector mother_particle_p4;
 		for (std::vector<reco::Particle>::const_iterator it=particles.begin();it!=particles.end();it++)

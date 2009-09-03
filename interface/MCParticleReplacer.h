@@ -41,6 +41,7 @@ public:
 private:
         edm::InputTag src_;
         edm::InputTag srcHepMC_;
+        unsigned int replacementMode_;
         boost::shared_ptr<ParticleReplacerBase> replacer_;
 };
 

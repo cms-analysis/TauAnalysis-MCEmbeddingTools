@@ -3,9 +3,13 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 
+// replacementMode =
+//	0 - remove Myons from existing HepMCProduct and implant taus (+decay products)
+//	1 - build new HepMCProduct only with taus (+decay products)
 MCParticleReplacer::MCParticleReplacer(const edm::ParameterSet& pset):
   src_(pset.getParameter<edm::InputTag>("selectedParticles")),
   srcHepMC_(pset.getParameter<edm::InputTag>("HepMCSource")),
+  replacementMode_(pset.getParameter<unsigned int>("replacementMode")),
   replacer_(ParticleReplacerBase::factory(pset.getUntrackedParameter<int>("desiredReplacerClass", 1), pset)) {
 
   produces<edm::HepMCProduct>();
@@ -22,7 +26,19 @@ MCParticleReplacer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   edm::Handle<reco::MuonCollection> muons;
   iEvent.getByLabel(src_, muons);
 
-  std::auto_ptr<HepMC::GenEvent> evt = replacer_->produce(*muons);
+  std::auto_ptr<HepMC::GenEvent> evt;
+  if(replacementMode_ == 0) {
+    edm::Handle<edm::HepMCProduct> HepMCHandle;	 
+    iEvent.getByLabel(srcHepMC_, HepMCHandle);
+
+    evt = replacer_->produce(*muons, 0, HepMCHandle->GetEvent());
+  }
+  else if(replacementMode_ == 1){
+    evt = replacer_->produce(*muons);
+  }
+  else
+    throw cms::Exception("Configuration") << "Unsupported replacementMode " << replacementMode_ << ", should be 1 or 0" << std::endl;
+
 
   if(evt.get() != 0) {
     std::auto_ptr<edm::HepMCProduct> bare_product(new edm::HepMCProduct());  
