@@ -1,4 +1,5 @@
 #include "TauAnalysis/MCEmbeddingTools/interface/MCParticleReplacer.h"
+#include "TauAnalysis/MCEmbeddingTools/interface/ParticleReplacerFactory.h"
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
@@ -10,7 +11,7 @@ MCParticleReplacer::MCParticleReplacer(const edm::ParameterSet& pset):
   src_(pset.getParameter<edm::InputTag>("selectedParticles")),
   srcHepMC_(pset.getParameter<edm::InputTag>("HepMCSource")),
   replacementMode_(pset.getParameter<unsigned int>("replacementMode")),
-  replacer_(ParticleReplacerBase::factory(pset.getUntrackedParameter<int>("desiredReplacerClass", 1), pset)) {
+  replacer_(ParticleReplacerFactory::create(pset.getUntrackedParameter<int>("desiredReplacerClass", 1), pset)) {
 
   produces<edm::HepMCProduct>();
 }

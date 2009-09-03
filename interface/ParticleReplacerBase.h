@@ -27,10 +27,7 @@
 
 #include "HepMC/GenEvent.h"
 
-#include<boost/shared_ptr.hpp>
 #include<memory>
-#include<string>
-
 
 class ParticleReplacerBase {
 public:
@@ -43,9 +40,6 @@ public:
   virtual void endJob();
 
   virtual std::auto_ptr<HepMC::GenEvent> produce(const reco::MuonCollection&, const reco::Vertex *pvtx=0, const HepMC::GenEvent *genEvt=0) = 0;
-
-  /// Factory method for new algorithm object creation
-  static boost::shared_ptr<ParticleReplacerBase> factory(int algo, const edm::ParameterSet& iConfig);
 
 protected:
 
