@@ -6,6 +6,16 @@
 #include "HepMC/PythiaWrapper.h"
 #include "HepMC/IO_HEPEVT.h"
 
+static bool call_pygive(const std::string& iParm) {
+  int numWarn = pydat1.mstu[26]; //# warnings
+  int numErr = pydat1.mstu[22];// # errors
+  // call the fortran routine pygive with a fortran string
+  PYGIVE( iParm.c_str(), iParm.length() );  
+  //if an error or warning happens it is problem
+  return pydat1.mstu[26] == numWarn && pydat1.mstu[22] == numErr;   
+}
+
+
 ParticleReplacerParticleGun::ParticleReplacerParticleGun(const edm::ParameterSet& iConfig) :
   ParticleReplacerBase(iConfig),
   tauola_(iConfig),
@@ -47,9 +57,7 @@ void ParticleReplacerParticleGun::beginJob() {
     char parameter[20];
     for(int i = 89; i <= 142; ++i) {
       snprintf(parameter, 20, "MDME(%i,1)=0", i);
-      /* FIXME
       call_pygive(std::string(parameter));
-      */
     }
     /* FIXME
     call_tauola(-1,1);
