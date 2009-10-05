@@ -21,6 +21,7 @@
 #include "TauAnalysis/MCEmbeddingTools/interface/ParticleReplacerBase.h"
 
 #include "GeneratorInterface/ExternalDecays/interface/TauolaInterface.h"
+#include "GeneratorInterface/Pythia6Interface/interface/Pythia6Service.h"
 
 #include<string>
 #include<vector>
@@ -45,6 +46,7 @@ private:
   float randomPolarization();
 
   gen::TauolaInterface tauola_;
+  gen::Pythia6Service pythia_;
 
   std::string particleOrigin_;
   std::string forceTauPolarization_;

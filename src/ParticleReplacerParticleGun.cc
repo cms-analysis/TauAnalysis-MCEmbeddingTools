@@ -6,19 +6,10 @@
 #include "HepMC/PythiaWrapper.h"
 #include "HepMC/IO_HEPEVT.h"
 
-static bool call_pygive(const std::string& iParm) {
-  int numWarn = pydat1.mstu[26]; //# warnings
-  int numErr = pydat1.mstu[22];// # errors
-  // call the fortran routine pygive with a fortran string
-  PYGIVE( iParm.c_str(), iParm.length() );  
-  //if an error or warning happens it is problem
-  return pydat1.mstu[26] == numWarn && pydat1.mstu[22] == numErr;   
-}
-
-
-ParticleReplacerParticleGun::ParticleReplacerParticleGun(const edm::ParameterSet& iConfig) :
+ParticleReplacerParticleGun::ParticleReplacerParticleGun(const edm::ParameterSet& iConfig):
   ParticleReplacerBase(iConfig),
-  tauola_(iConfig),
+  tauola_(iConfig.getParameter<edm::ParameterSet>("ExternalDecays").getParameter<edm::ParameterSet>("Tauola")),
+  pythia_(iConfig),
   particleOrigin_(iConfig.getParameter<std::string>("ParticleOrigin")),
   forceTauPolarization_(iConfig.getParameter<std::string>("ForceTauPolarization")),
   forceTauDecay_(iConfig.getParameter<std::string>("ForceTauDecay")),
@@ -51,14 +42,11 @@ ParticleReplacerParticleGun::ParticleReplacerParticleGun(const edm::ParameterSet
 ParticleReplacerParticleGun::~ParticleReplacerParticleGun() {}
 
 void ParticleReplacerParticleGun::beginJob() {
+  gen::Pythia6Service::InstanceWrapper guard(&pythia_);
+
+  pythia_.setGeneralParams();
+
   if(abs(gunParticle_) == 15) {
-    edm::LogInfo("MuonReplacement") << "Disabling tau decays in Pythia" << std::endl;
-    
-    char parameter[20];
-    for(int i = 89; i <= 142; ++i) {
-      snprintf(parameter, 20, "MDME(%i,1)=0", i);
-      call_pygive(std::string(parameter));
-    }
     /* FIXME
     call_tauola(-1,1);
     */
@@ -66,9 +54,11 @@ void ParticleReplacerParticleGun::beginJob() {
 }
 
 void ParticleReplacerParticleGun::endJob() {
-  /* FIXME
-  call_tauola(1,1);
-  */
+  if(abs(gunParticle_) == 15) {
+    /* FIXME
+       call_tauola(1,1);
+    */
+  }
 }
 
 std::auto_ptr<HepMC::GenEvent> ParticleReplacerParticleGun::produce(const reco::MuonCollection& muons, const reco::Vertex *pvtx, const HepMC::GenEvent *genEvt) {
@@ -79,6 +69,8 @@ std::auto_ptr<HepMC::GenEvent> ParticleReplacerParticleGun::produce(const reco::
   std::vector<HepMC::FourVector> muons_corrected;
   muons_corrected.reserve(muons.size());
   correctTauMass(muons, muons_corrected);
+
+  gen::Pythia6Service::InstanceWrapper guard(&pythia_);
 
   for(unsigned int i=0; i<muons_corrected.size(); ++i) {
     HepMC::FourVector& muon = muons_corrected[i];
