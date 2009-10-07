@@ -25,7 +25,9 @@ MCParticleReplacer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
 
   edm::Handle<reco::MuonCollection> muons;
-  iEvent.getByLabel(src_, muons);
+  
+  if (!iEvent.getByLabel(src_, muons))
+  	return;
 
   std::auto_ptr<HepMC::GenEvent> evt;
   if(replacementMode_ == 0) {
