@@ -13,5 +13,7 @@
         <use name=DataFormats/MuonReco>
         <use name=CommonTools/UtilAlgos>
         <use name=DataFormats/ParticleFlowCandidate>
+        <use   name="DataFormats/RPCRecHit">
+
 </library>
 

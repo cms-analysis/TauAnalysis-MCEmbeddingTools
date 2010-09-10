@@ -10,6 +10,10 @@ def customise(process):
   process._Process__name="HLT2"
   process.TFileService = cms.Service("TFileService",  fileName = cms.string("histo.root")          )
 
+  print "FIXME: will keep all event content."
+  process.output.outputCommands = cms.untracked.vstring("drop *")
+
+  '''
   print "Changing eventcontent to RAW+AODSIM + misc. "
   process.output.outputCommands = cms.untracked.vstring("drop *")
   process.output.outputCommands.extend(process.RAWEventContent.outputCommands )
@@ -29,7 +33,7 @@ def customise(process):
       del process.output.outputCommands[index]
       index -= 1
     index += 1  
-
+  '''
 
 
   process.VtxSmeared = cms.EDProducer("FlatEvtVtxGenerator", 
