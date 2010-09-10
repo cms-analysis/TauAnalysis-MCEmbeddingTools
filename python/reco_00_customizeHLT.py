@@ -11,7 +11,7 @@ def customise(process):
   process.TFileService = cms.Service("TFileService",  fileName = cms.string("histo.root")          )
 
   print "FIXME: will keep all event content."
-  process.output.outputCommands = cms.untracked.vstring("drop *")
+  process.output.outputCommands = cms.untracked.vstring("keep *")
 
   '''
   print "Changing eventcontent to RAW+AODSIM + misc. "
