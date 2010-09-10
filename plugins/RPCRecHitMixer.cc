@@ -149,8 +149,9 @@ RPCRecHitMixer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 // TODO - optimize. Checking rechit by rechit is not good idea (matching should be done once)
 bool RPCRecHitMixer::recHitNotFromSelectedMuon(RPCRecHitCollection::const_iterator itRPC){
-
-  double minDR = -1;  
+  
+  return true; // TODO: fix segfault
+  
   const std::vector< reco::Muon > * toBeAdded = selectedMuonsHandle.product();
   const std::vector< reco::Muon > * allMu = allMuonsHandle.product();
 
@@ -159,6 +160,7 @@ bool RPCRecHitMixer::recHitNotFromSelectedMuon(RPCRecHitCollection::const_iterat
   std::vector< reco::Muon >::const_iterator itSelectedMu = toBeAdded->begin();
   std::vector< reco::Muon >::const_iterator itSelectedMuE = toBeAdded->end();
   for (; itSelectedMu != itSelectedMuE; ++itSelectedMu ){
+    double minDR = -1;  
     std::vector< reco::Muon >::const_iterator itAllMu = allMu->begin();
     std::vector< reco::Muon >::const_iterator itAllMuE = allMu->end();
     for ( ;itAllMu != itAllMuE; ++itAllMu) {
