@@ -13,7 +13,7 @@
 //
 // Original Author:  Tomasz Maciej Frueboes
 //         Created:  Fri Apr  9 12:15:56 CEST 2010
-// $Id: RecoTracksMixer.cc,v 1.1 2010/04/13 11:18:57 fruboes Exp $
+// $Id: RecoTracksMixer.cc,v 1.2 2010/09/06 11:21:38 fruboes Exp $
 //
 //
 
@@ -104,7 +104,6 @@ RecoTracksMixer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
    std::auto_ptr< reco::TrackCollection  > newCol(new reco::TrackCollection );
 
    //std::cout << "##########################################\n";
-   int i  = 0; 
    std::vector< edm::Handle<reco::TrackCollection> >::iterator it = cols.begin();
    for(;it != cols.end(); ++it) 
    {

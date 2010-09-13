@@ -1,4 +1,6 @@
+<flags CXXFLAGS="-O0 -g3 -fno-inline">
 <library name="TauAnalysisMCEmbeddingToolsPlugins" file="*.cc">
+        <flags CXXFLAGS="-O0 -g3 -fno-inline">
         <use name=FWCore/Framework>
         <use name=FWCore/PluginManager>
         <use name=FWCore/ParameterSet>

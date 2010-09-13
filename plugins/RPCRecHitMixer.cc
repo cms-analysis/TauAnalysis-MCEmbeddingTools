@@ -13,7 +13,7 @@
 //
 // Original Author:  Tomasz Fruboes
 //         Created:  Fri Sep 10 14:22:06 CEST 2010
-// $Id$
+// $Id: RPCRecHitMixer.cc,v 1.1.2.2 2010/09/10 15:28:19 fruboes Exp $
 //
 //
 
@@ -124,6 +124,8 @@ RPCRecHitMixer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
      if ( recHitNotFromSelectedMuon(itRPC) ) { 
        RPCRecHit *newHit = new RPCRecHit(*itRPC);
        recHitMap[itRPC->rpcId().rawId()].push_back(newHit);
+     } else {
+       //std::cout << "rh cleaned\n";
      }
    }
 
@@ -150,8 +152,7 @@ RPCRecHitMixer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 // TODO - optimize. Checking rechit by rechit is not good idea (matching should be done once)
 bool RPCRecHitMixer::recHitNotFromSelectedMuon(RPCRecHitCollection::const_iterator itRPC){
   
-  return true; // TODO: fix segfault
-  
+  //return true; // TODO: fix segfault
   const std::vector< reco::Muon > * toBeAdded = selectedMuonsHandle.product();
   const std::vector< reco::Muon > * allMu = allMuonsHandle.product();
 
@@ -159,20 +160,22 @@ bool RPCRecHitMixer::recHitNotFromSelectedMuon(RPCRecHitCollection::const_iterat
   
   std::vector< reco::Muon >::const_iterator itSelectedMu = toBeAdded->begin();
   std::vector< reco::Muon >::const_iterator itSelectedMuE = toBeAdded->end();
+      
   for (; itSelectedMu != itSelectedMuE; ++itSelectedMu ){
     double minDR = -1;  
     std::vector< reco::Muon >::const_iterator itAllMu = allMu->begin();
     std::vector< reco::Muon >::const_iterator itAllMuE = allMu->end();
     for ( ;itAllMu != itAllMuE; ++itAllMu) {
        double dr = reco::deltaR( *itAllMu, *itSelectedMu);
-       if (dr < minDR) {
+       if (dr < minDR || minDR < 0) {
           minDR = dr;
           closestMu = itAllMu;
        }
     }
 
-    if (minDR < 0.001) {
+    if (minDR < 0.001 && closestMu != allMu->end() ) {
      // TODO(?):  use nonglobal muons ?
+     // TODO how got is rechit assigment here? Will be clean everything?? 
      if (closestMu->isGlobalMuon()) {
        for ( trackingRecHit_iterator  rh = closestMu->globalTrack()->recHitsBegin() ;
                                       rh!= closestMu->globalTrack()->recHitsEnd ();
