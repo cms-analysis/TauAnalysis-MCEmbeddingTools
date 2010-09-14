@@ -22,16 +22,17 @@ def customise(process):
   process.TFileService = cms.Service("TFileService",  fileName = cms.string("histo.root")          )
 
 
-  '''
-  For the moment track mixer is incomplete
+  """
+  "For the moment track mixer is incomplete"
   "Place RecoTracksMixer in the sequences" 
   process.generalTracksRenamed = process.generalTracks.clone()
   process.generalTracks = cms.EDProducer("RecoTracksMixer",
       trackCol1 = cms.InputTag("dimuonsGlobal"),
-      trackCol2 = cms.InputTag("generalTracksRenamed","","RECO2")
+      trackCol2 = cms.InputTag("generalTracksRenamed","","RECO2"),
+      doExtra = cms.untracked.bool(True)
   )  
   placeMixer(process, process.generalTracks,  process.generalTracksRenamed)
-  '''
+  """
   
   process.rpcRecHitsRenamed = process.rpcRecHits.clone()
   process.rpcRecHits = cms.EDProducer("RPCRecHitMixer",
@@ -42,6 +43,14 @@ def customise(process):
   )
   
   placeMixer(process, process.rpcRecHits,  process.rpcRecHitsRenamed)
+  
+  """
+  print "Removing doAlldEdXEstimators sequence"
+  for s in process.sequences:
+    seq =  getattr(process,s)
+    seq.remove(process.doAlldEdXEstimators)
+  """
+
   
   print "Changing eventcontent to AODSIM + misc "
   process.output.outputCommands = process.AODSIMEventContent.outputCommands
