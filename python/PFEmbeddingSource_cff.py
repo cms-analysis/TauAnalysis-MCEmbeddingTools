@@ -61,6 +61,7 @@ generator.src = inputColl
 # MuonCaloCleaner
 
 #
+'''
 from TrackingTools.TrackAssociator.default_cfi import *
 anaDeposits = cms.EDProducer('MuonCaloCleaner',
    TrackAssociatorParameterBlock,
@@ -70,6 +71,7 @@ anaDeposits = cms.EDProducer('MuonCaloCleaner',
  
 
 ProductionFilterSequence = cms.Sequence(removedInputMuons*generator*filterEmptyEv*anaDeposits)
-
+'''
+ProductionFilterSequence = cms.Sequence(removedInputMuons*generator*filterEmptyEv)
 
 #ProductionFilterSequence = cms.Sequence(generator)

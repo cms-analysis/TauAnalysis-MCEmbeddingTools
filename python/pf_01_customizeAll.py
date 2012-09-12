@@ -170,30 +170,53 @@ def customise(process):
         setFromCL = True
   else:
     print "CL parsing disabled!"
+
+
+    
+
+  if setFromCL or hasattr(process,"forceMDTAU"):
+    if setFromCL:
+      mdtau = options.mdtau
+    else:
+      mdtau = process.forceMDTAU.val
+
+    print "Setting mdtau to ", mdtau
+    process.generator.ZTauTau.TauolaOptions.InputCards.mdtau = mdtau
+    process.newSource.ZTauTau.TauolaOptions.InputCards.mdtau = mdtau
+    process.generator.ParticleGun.ExternalDecays.Tauola.InputCards.mdtau = mdtau
+    process.newSource.ParticleGun.ExternalDecays.Tauola.InputCards.mdtau = mdtau
+
+  if setFromCL or hasattr(process,"forceMinVisPT")  :
+
+    if setFromCL:
+       minVisPT = cms.untracked.string(options.minVisibleTransverseMomentum)
+    else:
+       minVisPT = process.forceMinVisPT.val
+
+    print "Setting minVisibleTransverseMomentum to ", minVisPT
+    process.newSource.ZTauTau.minVisibleTransverseMomentum = minVisPT
+    process.generator.ZTauTau.minVisibleTransverseMomentum = minVisPT
+
   if setFromCL:
-    print "Setting mdtau to ", options.mdtau
-    process.generator.ZTauTau.TauolaOptions.InputCards.mdtau = options.mdtau 
-    process.newSource.ZTauTau.TauolaOptions.InputCards.mdtau = options.mdtau
-    process.generator.ParticleGun.ExternalDecays.Tauola.InputCards.mdtau = options.mdtau 
-    process.newSource.ParticleGun.ExternalDecays.Tauola.InputCards.mdtau = options.mdtau 
-
-    print "Setting minVisibleTransverseMomentum to ", options.minVisibleTransverseMomentum
-    process.newSource.ZTauTau.minVisibleTransverseMomentum = cms.untracked.string(options.minVisibleTransverseMomentum)
-    process.generator.ZTauTau.minVisibleTransverseMomentum = cms.untracked.string(options.minVisibleTransverseMomentum)
-
     print "Setting transformationMode to ", options.transformationMode
     process.generator.ZTauTau.transformationMode = cms.untracked.int32(options.transformationMode)
     process.newSource.ZTauTau.transformationMode = cms.untracked.int32(options.transformationMode)
 
-    print "options.overrideBeamSpot", options.overrideBeamSpot
-    if options.overrideBeamSpot != 0:
-      bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v26_offline") # 52x data PR gt
-      # bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v21_offline") # 42x data PR gt
-      # bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v18_offline") # 41x data PR gt
-      # bs = cms.string("BeamSpotObjects_2009_LumiBased_v17_offline") # 38x data gt
-      #bs = cms.string("BeamSpotObjects_2009_v14_offline") # 36x data gt
-      #  tag = cms.string("Early10TeVCollision_3p8cm_31X_v1_mc_START"), # 35 default
-      #  tag = cms.string("Realistic900GeVCollisions_10cm_STARTUP_v1_mc"), # 36 default
+  if setFromCL or hasattr(process,"overrideBS"):
+    if options.overrideBeamSpot != 0 or hasattr(process,"overrideBS"):
+      if setFromCL:
+          bs = cms.string("BeamSpotObjects_PCL_byLumi_v0_prompt") # 53x -  C period, promptReco V1, V2
+          #bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v27_offline") # 53x - A,B period
+          #bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v26_offline") # 52x data PR gt
+          # bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v21_offline") # 42x data PR gt
+          # bs = cms.string("BeamSpotObjects_2009_LumiBased_SigmaZ_v18_offline") # 41x data PR gt
+          # bs = cms.string("BeamSpotObjects_2009_LumiBased_v17_offline") # 38x data gt
+          #bs = cms.string("BeamSpotObjects_2009_v14_offline") # 36x data gt
+          #  tag = cms.string("Early10TeVCollision_3p8cm_31X_v1_mc_START"), # 35 default
+          #  tag = cms.string("Realistic900GeVCollisions_10cm_STARTUP_v1_mc"), # 36 default
+      else:
+           bs = process.overrideBS.val
+
       process.GlobalTag.toGet = cms.VPSet(
         cms.PSet(record = cms.string("BeamSpotObjectsRcd"),
            tag = bs,
@@ -204,6 +227,16 @@ def customise(process):
     else:
       print "BeamSpot in globaltag not changed"
 
+
+  if hasattr(process,"muSRC"):
+    muSRC = process.muSRC.val
+    print "Setting muon src to", muSRC
+    process.generator.src = muSRC
+    if hasattr(process,"anaDeposits"):
+      process.anaDeposits.selectedMuons = muSRC
+    process.removedInputMuons.selectedMuons = muSRC
+
+  if setFromCL:
     if options.useJson !=  0:
       print "Enabling json usage"
       import PhysicsTools.PythonAnalysis.LumiList as LumiList
@@ -430,6 +463,10 @@ def customise(process):
   print "  call in order to controll process  customization: "
   print "     process.doNotParse =  cms.PSet() # disables CL parsing for crab compat"
   print "     process.doZmumuSkim = cms.PSet() # adds Zmumu skimming before embedding is run"
+  print "     process.overrideBS  = cms.PSet() # change BS to the one used in data"
+  print "     process.forceMDTAU  = cms.PSet(  val = cms.int(116) ) # change mdtau value"
+  print '     process.forceMinVisPT = cms.PSet(  val = cms.untracked.string("mu1_13had1_17") )'
+  print '     process.muSRC = cms.PSet(  val = cms.InputTag("goldenZmumuCandidatesGe2IsoMuons") )'
   print "# ######################################################################################"
 
   return(process)
