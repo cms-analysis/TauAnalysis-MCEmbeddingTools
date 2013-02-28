@@ -98,12 +98,12 @@ MCParticleReplacer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   
 }
 
-void MCParticleReplacer::beginRun(edm::Run& iRun,const edm::EventSetup& iSetup)
+void MCParticleReplacer::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
 {
   replacer_->beginRun(iRun, iSetup);
 }
 
-void MCParticleReplacer::endRun()
+void MCParticleReplacer::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
 {
   replacer_->endRun();
 }

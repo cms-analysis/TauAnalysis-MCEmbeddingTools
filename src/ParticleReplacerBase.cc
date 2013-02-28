@@ -7,7 +7,7 @@ ParticleReplacerBase::ParticleReplacerBase(const edm::ParameterSet& iConfig):
 ParticleReplacerBase::~ParticleReplacerBase() {}
 
 void ParticleReplacerBase::beginJob() {}
-void ParticleReplacerBase::beginRun(edm::Run& iRun, const edm::EventSetup& iSetup) {}
+void ParticleReplacerBase::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup) {}
 void ParticleReplacerBase::endRun() {}
 void ParticleReplacerBase::endJob() {}
 

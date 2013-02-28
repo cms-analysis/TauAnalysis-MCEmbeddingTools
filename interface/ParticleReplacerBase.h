@@ -35,7 +35,7 @@ public:
   virtual ~ParticleReplacerBase();
 
   virtual void beginJob();
-  virtual void beginRun(edm::Run& iRun, const edm::EventSetup& iSetup);
+  virtual void beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup);
   virtual void endRun();
   virtual void endJob();
 

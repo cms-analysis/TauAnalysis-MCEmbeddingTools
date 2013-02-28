@@ -60,7 +60,7 @@ public:
 	~ParticleReplacerClass();
 
         virtual std::auto_ptr<HepMC::GenEvent> produce(const reco::MuonCollection& muons, const reco::Vertex *pvtx=0, const HepMC::GenEvent *genEvt=0);
-	virtual void beginRun(edm::Run& iRun,const edm::EventSetup& iSetup);
+	virtual void beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup);
 	virtual void endJob();
 
 private:

@@ -445,7 +445,7 @@ std::auto_ptr<HepMC::GenEvent> ParticleReplacerClass::produce(const reco::MuonCo
 }
 
 // ------------ method called once each job just before starting event loop  ------------
-void ParticleReplacerClass::beginRun(edm::Run& iRun,const edm::EventSetup& iSetup)
+void ParticleReplacerClass::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup)
 {
 	tauola_->init(iSetup);
 }
