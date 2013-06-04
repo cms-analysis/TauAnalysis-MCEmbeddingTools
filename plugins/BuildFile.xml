@@ -25,5 +25,6 @@
   <use   name="DQMServices/Core"/>
   <use   name="rootmath"/>
   <use   name="TauAnalysis/MCEmbeddingTools"/>
+  <use   name="TauAnalysis/CandidateTools"/>
   <flags   EDM_PLUGIN="1"/>
 </library>
